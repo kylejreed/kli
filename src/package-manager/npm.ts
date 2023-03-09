@@ -1,5 +1,6 @@
 import { PackageManager } from "@types";
 import { ExecCommand } from "@utils/cmd";
+import { getFileContents, writeFileContents } from "@utils/fs";
 
 export const npm = (cmd: ExecCommand): PackageManager => {
   return {
@@ -14,6 +15,12 @@ export const npm = (cmd: ExecCommand): PackageManager => {
     },
     cleanInstall: () => {
       cmd("npm ci");
+    },
+    getConfig: async () => {
+      return JSON.parse(await getFileContents("./package.json"));
+    },
+    setConfig: async (value) => {
+      await writeFileContents("./package.json", JSON.stringify(value, null, 2));
     },
   };
 };

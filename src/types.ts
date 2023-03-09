@@ -8,6 +8,8 @@ export interface PackageManager {
   install(...packages: string[]): void;
   devInstall(...packages: string[]): void;
   cleanInstall(): void;
+  getConfig(): Promise<Record<string, any>>;
+  setConfig(value: Record<string, any>): Promise<void>;
 }
 
 export interface ProjectManager {
@@ -17,3 +19,6 @@ export interface ProjectManager {
   applyTemplate(template: string): void;
   open(): void;
 }
+
+export const supportedAdditions = ["prisma", "ws"] as const;
+export type SupportedAdditions = typeof supportedAdditions[number];

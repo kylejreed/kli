@@ -12,3 +12,11 @@ export const ensurePathExists = (dirPath: string) => {
 export const copyContents = (fromPath: string, toPath: string) => {
   return fs.cp(fromPath, toPath, { recursive: true });
 };
+
+export const getFileContents = async (filePath: string) => {
+  return await fs.readFile(filePath, "utf8");
+};
+
+export const writeFileContents = async (filePath: string, contents: string) => {
+  return await fs.writeFile(filePath, contents);
+};

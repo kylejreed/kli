@@ -5,6 +5,7 @@ import { copyContents } from "@utils/fs";
 
 export abstract class BaseProjectManager implements ProjectManager {
   abstract packageManager: PackageManager;
+  abstract updateConfig(key: string, value: any): Promise<void>;
 
   protected projectCmd: ExecCommand;
   protected name: string;
@@ -29,6 +30,10 @@ export abstract class BaseProjectManager implements ProjectManager {
 
   setupGit(): void {
     this.projectCmd("git init");
+  }
+
+  run(command: string) {
+    this.projectCmd(command);
   }
 
   open() {

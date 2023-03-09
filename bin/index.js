@@ -7516,15 +7516,15 @@ var require_fromEvent = __commonJS({
         return function(handler) {
           return target[methodName](eventName, handler, options);
         };
-      }) : isNodeStyleEventEmitter(target) ? nodeEventEmitterMethods.map(toCommonHandlerRegistry(target, eventName)) : isJQueryStyleEventEmitter(target) ? jqueryMethods.map(toCommonHandlerRegistry(target, eventName)) : [], 2), add = _a2[0], remove = _a2[1];
-      if (!add) {
+      }) : isNodeStyleEventEmitter(target) ? nodeEventEmitterMethods.map(toCommonHandlerRegistry(target, eventName)) : isJQueryStyleEventEmitter(target) ? jqueryMethods.map(toCommonHandlerRegistry(target, eventName)) : [], 2), add2 = _a2[0], remove = _a2[1];
+      if (!add2) {
         if (isArrayLike_1.isArrayLike(target)) {
           return mergeMap_1.mergeMap(function(subTarget) {
             return fromEvent2(subTarget, eventName, options);
           })(innerFrom_1.innerFrom(target));
         }
       }
-      if (!add) {
+      if (!add2) {
         throw new TypeError("Invalid event target");
       }
       return new Observable_1.Observable(function(subscriber) {
@@ -7535,7 +7535,7 @@ var require_fromEvent = __commonJS({
           }
           return subscriber.next(1 < args.length ? args : args[0]);
         };
-        add(handler);
+        add2(handler);
         return function() {
           return remove(handler);
         };
@@ -22629,7 +22629,7 @@ var require_lodash = __commonJS({
           var id = ++idCounter;
           return toString(prefix) + id;
         }
-        var add = createMathOperation(function(augend, addend) {
+        var add2 = createMathOperation(function(augend, addend) {
           return augend + addend;
         }, 0);
         var ceil = createRound("ceil");
@@ -22822,7 +22822,7 @@ var require_lodash = __commonJS({
         lodash.extend = assignIn;
         lodash.extendWith = assignInWith;
         mixin(lodash, lodash);
-        lodash.add = add;
+        lodash.add = add2;
         lodash.attempt = attempt;
         lodash.camelCase = camelCase;
         lodash.capitalize = capitalize;
@@ -38417,6 +38417,9 @@ var {
   Help
 } = import_index.default;
 
+// src/types.ts
+var supportedAdditions = ["prisma", "ws"];
+
 // src/project-builder.ts
 var import_node_path3 = __toESM(require("path"));
 
@@ -39724,6 +39727,12 @@ var getDirectoryName = (dirPath) => {
 var copyContents = (fromPath, toPath) => {
   return import_promises.default.cp(fromPath, toPath, { recursive: true });
 };
+var getFileContents = async (filePath) => {
+  return await import_promises.default.readFile(filePath, "utf8");
+};
+var writeFileContents = async (filePath, contents) => {
+  return await import_promises.default.writeFile(filePath, contents);
+};
 
 // src/project-manager/base.ts
 var import_node_path2 = __toESM(require("path"));
@@ -39756,6 +39765,9 @@ var BaseProjectManager = class {
   setupGit() {
     this.projectCmd("git init");
   }
+  run(command) {
+    this.projectCmd(command);
+  }
   open() {
     this.projectCmd("code .");
   }
@@ -39775,6 +39787,12 @@ var npm = (cmd2) => {
     },
     cleanInstall: () => {
       cmd2("npm ci");
+    },
+    getConfig: async () => {
+      return JSON.parse(await getFileContents("./package.json"));
+    },
+    setConfig: async (value) => {
+      await writeFileContents("./package.json", JSON.stringify(value, null, 2));
     }
   };
 };
@@ -39784,6 +39802,15 @@ var NodeProjectManager = class extends BaseProjectManager {
   constructor(name, root) {
     super(name, root);
     this.packageManager = npm(this.projectCmd);
+  }
+  async updateConfig(key, value) {
+    const config = await this.packageManager.getConfig();
+    if (config[key] && typeof value === "object") {
+      config[key] = Object.assign({}, config[key], value);
+    } else {
+      config[key] = value;
+    }
+    this.packageManager.setConfig(config);
   }
 };
 
@@ -43373,6 +43400,15 @@ var getProjectType = async () => {
   });
   return type;
 };
+var chooseAdditionPackage = async () => {
+  const { choice } = await inquirer_default.prompt({
+    name: "choice",
+    type: "list",
+    message: "Choose package: ",
+    choices: supportedAdditions
+  });
+  return choice;
+};
 
 // src/init.ts
 var init2 = async (name) => {
@@ -43381,11 +43417,39 @@ var init2 = async (name) => {
   project.open();
 };
 
+// src/add.ts
+var add = async (addition) => {
+  addition ?? (addition = await chooseAdditionPackage());
+  switch (addition) {
+    case "prisma":
+      addPrisma();
+      break;
+    case "ws":
+      addSocketIO();
+      break;
+  }
+};
+function addPrisma() {
+  const node = new NodeProjectManager("", process.cwd());
+  node.packageManager.devInstall("prisma");
+  cmd("npx prisma init");
+  node.packageManager.install("@prisma/client");
+  node.updateConfig("scripts", {
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate dev"
+  });
+}
+function addSocketIO() {
+  const pm = npm(cmd);
+  pm.install("socket-io");
+}
+
 // src/bin.ts
 var { version } = require_package();
 var program2 = new Command();
 program2.version(version);
 program2.command("init").argument("<project-name>").action(init2);
+program2.command("add").addArgument(new Argument("[package]").choices(supportedAdditions)).action(add);
 program2.parse(process.argv);
 /*! Bundled license information:
 
