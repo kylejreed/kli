@@ -1,22 +1,32 @@
 {
   "name": "kli",
   "version": "1.0.0",
-  "description": "",
+  "description": "Kyle's CLI tool for project generation",
+  "keywords": [
+    "kyle",
+    "kli",
+    "cli"
+  ],
+  "author": "Kyle Reed",
   "main": "src/index.ts",
-  "scripts": {
-    "watch": "tsx watch src/index.ts",
-    "dev": "tsx src/index.ts",
-    "build": "tsc"
+  "bin": {
+    "kli": "./bin/index.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "scripts": {
+    "watch": "tsx watch src/bin.ts",
+    "dev": "tsx src/bin.ts",
+    "build": "tsc",
+    "prepare": "esbuild src/bin.ts --outfile=bin/index.js --bundle --platform=node --target=node14"
+  },
+  "license": "MIT",
   "devDependencies": {
     "@types/inquirer": "^9.0.3",
+    "esbuild": "^0.17.11",
     "tsx": "^3.12.3",
     "typescript": "^4.9.5"
   },
   "dependencies": {
+    "commander": "^10.0.0",
     "inquirer": "^9.1.4",
     "listr2": "^5.0.7"
   }

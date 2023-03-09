@@ -8,7 +8,6 @@ export class ProjectBuilder {
   #type: ProjectType;
   #name: string;
   #projectRoot: string;
-  #initializeGit?: boolean;
 
   constructor(type: ProjectType) {
     this.#type = type;
@@ -25,31 +24,25 @@ export class ProjectBuilder {
     return this;
   }
 
-  useGit(value: boolean): ProjectBuilder {
-    this.#initializeGit = value;
-    return this;
-  }
-
-  run() {
+  async run() {
     const tasks = new Listr([], { concurrent: false });
     let project: ProjectManager;
     switch (this.#type) {
       case ProjectType.NodeBasic:
         project = new NodeProjectManager(this.#name, this.#projectRoot);
-        tasks.add({ title: "Scaffolding files", task: () => project.cloneRepo("kylejreed/node-basic-template") });
-        tasks.add({ title: "Initializing...", task: () => project.init() });
-        tasks.add({ title: "Initializing git", task: () => project.setupGit() });
-        tasks.add({ title: "Installing packages", task: () => project.packageManager.install() });
+        tasks.add({ title: "Cloning repo...", task: () => project.cloneRepo("kylejreed/node-basic-template") });
+        tasks.add({ title: "Initializing git...", task: () => project.setupGit() });
+        tasks.add({ title: "Installing packages...", task: () => project.packageManager.install() });
         break;
       case ProjectType.NodeAPI:
         project = new NodeProjectManager(this.#name, this.#projectRoot);
-        tasks.add({ title: "Initializing...", task: () => project.init() });
-        tasks.add({ title: "Scaffolding files", task: () => project.cloneRepo("kylejreed/node-api-template") });
-        tasks.add({ title: "Initializing git", task: () => project.setupGit() });
-        tasks.add({ title: "Installing packages", task: () => project.packageManager.install() });
+        tasks.add({ title: "Cloning repo...", task: () => project.cloneRepo("kylejreed/node-api-template") });
+        tasks.add({ title: "Initializing git...", task: () => project.setupGit() });
+        tasks.add({ title: "Installing packages...", task: () => project.packageManager.install() });
         break;
     }
 
-    return tasks.run().then(() => project);
+    await tasks.run();
+    return project;
   }
 }

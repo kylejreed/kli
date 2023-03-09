@@ -12,7 +12,6 @@ export interface PackageManager {
 
 export interface ProjectManager {
   packageManager: PackageManager;
-  init(): void;
   cloneRepo(name: string): void;
   setupGit(): void;
   applyTemplate(template: string): void;

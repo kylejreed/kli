@@ -4,7 +4,6 @@ import { ExecCommand, cmd, getCmd } from "@utils/cmd";
 import { copyContents } from "@utils/fs";
 
 export abstract class BaseProjectManager implements ProjectManager {
-  abstract init(): void;
   abstract packageManager: PackageManager;
 
   protected projectCmd: ExecCommand;
